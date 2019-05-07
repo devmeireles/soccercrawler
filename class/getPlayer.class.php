@@ -490,7 +490,8 @@ class getPlayer{
             'playerInfo'        =>  $this->getPlayerData($id),
             'leagues'           =>  $this->getPlayerStats($id),
             'national'          =>  $this->getNationalData($id),
-            'club'              =>  $this->getNationalLeague($id)
+            'club'              =>  $this->getNationalLeague($id),
+            'lastScrap'         =>  date("Y-m-d h:i:s")
         ];
 
         return $data;
