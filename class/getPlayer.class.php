@@ -21,7 +21,115 @@ use Symfony\Component\CssSelector;
 class getPlayer{
 
     public function getPlayerData($id){
+        $url = 'https://www.transfermarkt.com';
+        $uri = '/player/profil/spieler/'.$id;
 
+        $userAgent = 'Mozilla/5.0 (Windows NT 10.0)'
+                . ' AppleWebKit/537.36 (KHTML, like Gecko)'
+                . ' Chrome/48.0.2564.97'
+                . ' Safari/537.36';
+        $headers = array('User-Agent' => $userAgent);
+
+        $client = new GuzzleHttpClient($url);
+        $request = $client->get($uri, $headers);
+
+        try {
+            $response = $request->send();
+            $body = $response->getBody(true);
+        } catch (ClientErrorResponseException $e) {
+            $responseBody = $e->getResponse()->getBody(true);
+            echo $responseBody;
+        }
+
+        $crawler = new Crawler($body);
+
+        $filter = '.pager';
+
+        $checker = $crawler
+            ->filter($filter)
+            ->each(function (Crawler $node) {
+                return $node->html();
+            });
+
+        if(count($checker) < 1){
+            $filter = 'div.spielerdaten table.auflistung tr th';
+
+            $dataLabel = $crawler
+                ->filter($filter)
+                ->each(function (Crawler $node) {
+                    return toKey($node->text());
+                });
+
+            $filter = 'div.spielerdaten table.auflistung tr td';
+
+            $dataValue = $crawler
+                ->filter($filter)
+                ->each(function (Crawler $node) {
+                    return trim($node->text());
+                });
+
+            $playerInfo = [];
+            foreach ($dataValue as $keyValue => $valueValue) {
+                foreach ($dataLabel as $keyItem => $valueItem) {
+                    if($keyItem === $keyValue){
+                        $playerInfo[toKey($valueItem)] = [
+                            $valueValue
+                        ];
+                    }
+                }
+            }
+
+
+            $filter = 'h1[itemprop=name]';
+            $playerName = $crawler
+            ->filter($filter)
+            ->each(function (Crawler $node) {
+                return $node->text();
+            });
+
+            try{
+                $filter = 'div.dataBild img';
+                $playerPhoto = $crawler->filter($filter)->attr('src');
+            }catch(\Exception $e){
+                $playerPhoto = NULL;
+            }
+
+            try{
+                $filter = '.dataZusatzbox .dataZusatzDaten .hauptpunkt';
+                $playerClub = $crawler->filter($filter)->text();
+            }catch(\Exception $e){
+                $playerClub = NULL;
+            }
+
+
+            if(!$playerClub)
+                $playerClub = [];
+
+            try {
+                $filter = '.dataZusatzDaten .mediumpunkt a';
+                $playerLeague = trim($crawler->filter($filter)->text());
+                    
+            } catch (\Exception $e) {
+                $playerLeague = NULL;
+            }
+        
+            $filter = '.dataZusatzImage a img';
+            $clubImage = trim($crawler->filter($filter)->attr('src'));
+
+            if(!$clubImage)
+                $clubImage = [];
+
+            return $playerData = [
+                'playerName'    =>  $playerName,
+                'playerPhoto'   =>  $playerPhoto,
+                'actualClub'    =>  [
+                    'club'      =>  $playerClub,
+                    'league'    =>  $playerLeague,
+                    'image'     =>  $clubImage,
+                ],
+                'playerData'    =>  $playerInfo,
+            ];
+        }
     }
     
     public function getPlayerStats($id){
@@ -137,63 +245,9 @@ class getPlayer{
                 }
             }
 
-            //Get player name
-            $filter = 'h1[itemprop=name]';
-            $playerName = $crawler
-            ->filter($filter)
-            ->each(function (Crawler $node) {
-                return $node->text();
-            });
-
-            try{
-                $filter = 'div.dataBild img';
-                $playerPhoto = $crawler->filter($filter)->attr('src');
-            }catch(\Exception $e){
-                $playerPhoto = NULL;
-            }
-
-            try{
-                $filter = '.dataZusatzbox .dataZusatzDaten .hauptpunkt';
-                $playerClub = $crawler->filter($filter)->text();
-            }catch(\Exception $e){
-                $playerClub = NULL;
-            }
-
-
-            if(!$playerClub)
-                $playerClub = [];
-
-            try {
-                $filter = '.dataZusatzDaten .mediumpunkt a';
-                $playerLeague = trim($crawler->filter($filter)->text());
-                    
-            } catch (\Exception $e) {
-                $playerLeague = NULL;
-            }
-        
-            $filter = '.dataZusatzImage a img';
-            $clubImage = trim($crawler->filter($filter)->attr('src'));
-
-            if(!$clubImage)
-                $clubImage = [];
 
             return $playerData = [
-                'playerID'          =>  $id,
-                'playerName'        =>  $playerName,
-                'playerPhoto'       =>  $playerPhoto,
-                'playerInfo'        =>  $playerInfo,
-                'actualClub'        =>  [
-                    'club'      =>  $playerClub,
-                    'league'    =>  $playerLeague,
-                    'image'     =>  $clubImage,
-                ],
                 'leagueStatistics'    =>  $leagueStatisticsObj,
-
-                // actualClub: [{
-                //     club: $('.dataZusatzbox .dataZusatzDaten .hauptpunkt').text(),
-                //     league: $('.dataZusatzDaten .mediumpunkt a' ).text().trim(),
-                //     image: $('.dataZusatzImage a img').attr('src')
-                // }],
             ];
         }
     }
@@ -432,9 +486,11 @@ class getPlayer{
 
     public function mountData($id){
         $data = [
-            'player'            =>  $this->getPlayerData($id),
+            'id'                =>  $id,
+            'playerInfo'        =>  $this->getPlayerData($id),
+            'leagues'           =>  $this->getPlayerStats($id),
             'national'          =>  $this->getNationalData($id),
-            'nationalLeague'    =>  $this->getNationalLeague($id)
+            'club'              =>  $this->getNationalLeague($id)
         ];
 
         return $data;
