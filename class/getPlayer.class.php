@@ -484,6 +484,10 @@ class getPlayer{
         }
     }
 
+    public function getTrophies($id){
+        return NULL;
+    }
+
     public function mountData($id){
         $data = [
             'id'                =>  $id,
@@ -491,6 +495,7 @@ class getPlayer{
             'leagues'           =>  $this->getPlayerStats($id),
             'national'          =>  $this->getNationalData($id),
             'club'              =>  $this->getNationalLeague($id),
+            'trophies'          =>  $this->getTrophies($id),
             'lastScrap'         =>  date("Y-m-d h:i:s")
         ];
 
