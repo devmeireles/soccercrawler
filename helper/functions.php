@@ -34,3 +34,28 @@ function urlText($item){
         return NULL;
     }
 }
+
+function toDate($date){
+    return date('Y-m-d', strtotime($date));
+}
+
+function positionsToArray($string){
+    if (strpos($string, ' - ') !== false) {
+        $data = explode(' - ', $string);
+        return $data;
+    }
+}
+
+function citizenshipToArray($string){
+    $string = substr($string, 4);
+    $trans = get_html_translation_table(HTML_ENTITIES);
+    $encoded = strtr($string, $trans);
+
+    $string = str_replace('&nbsp;', '@', $encoded);
+
+    if (strpos($string, '@@') !== false) {
+        $data = explode('@@', $string);
+        return $data;
+    }
+    
+}
