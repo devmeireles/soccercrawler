@@ -72,13 +72,38 @@ class getPlayer{
             foreach ($dataValue as $keyValue => $valueValue) {
                 foreach ($dataLabel as $keyItem => $valueItem) {
                     if($keyItem === $keyValue){
-                        $playerInfo[toKey($valueItem)] = [
-                            $valueValue
-                        ];
+                        $playerInfo[toKey($valueItem)] = $valueValue;
+
+                        if(toKey($valueItem) == "dateOfBirth"){
+                            $playerInfo['dateOfBirth'] = toDate($valueValue);
+                        }
+
+                        if(toKey($valueItem) == "joined"){
+                            $playerInfo['joined'] = toDate($valueValue);
+                        }
+
+                        if(toKey($valueItem) == "dateOfLastContractExtension"){
+                            $playerInfo['dateOfLastContractExtension'] = toDate($valueValue);
+                        }
+
+                        if(toKey($valueItem) == "contractUntil"){
+                            if(trim($valueValue, ' ') != '-'){
+                                $playerInfo['contractUntil'] = toDate($valueValue);
+                            }else{
+                                unset($playerInfo['contractUntil']);
+                            }
+                        }
+
+                        if(toKey($valueItem) == "position"){
+                            $playerInfo['position'] = positionsToArray($valueValue);
+                        }
+
+                        if(toKey($valueItem) == "citizenship"){
+                            $playerInfo['citizenship'] = citizenshipToArray($valueValue);
+                        }
                     }
                 }
             }
-
 
             $filter = 'h1[itemprop=name]';
             $playerName = $crawler
@@ -120,7 +145,7 @@ class getPlayer{
                 $clubImage = [];
 
             return $playerData = [
-                'playerName'    =>  $playerName,
+                'playerName'    =>  $playerName[0],
                 'playerPhoto'   =>  $playerPhoto,
                 'actualClub'    =>  [
                     'club'      =>  $playerClub,
@@ -218,7 +243,7 @@ class getPlayer{
                         'substitutedOn'     => $clubStatistics[++$i],
                         'substitutedOff'    => $clubStatistics[++$i],
                         'yellowCards'       => $clubStatistics[++$i],
-                        'yellow/redCards'   => $clubStatistics[++$i],
+                        'yellowRedCards'   => $clubStatistics[++$i],
                         'LeaguredCardse'    => $clubStatistics[++$i],
                         'concededGoals'     => $clubStatistics[++$i],
                         'cleanSheets'       => $clubStatistics[++$i],
@@ -236,7 +261,7 @@ class getPlayer{
                         'substitutedOn'     => $clubStatistics[++$i],
                         'substitutedOff'    => $clubStatistics[++$i],
                         'yellowCards'       => $clubStatistics[++$i],
-                        'yellow/redCards'   => $clubStatistics[++$i],
+                        'yellowRedCards'   => $clubStatistics[++$i],
                         'LeaguredCardse'    => $clubStatistics[++$i],
                         'penaltyGoals'      => $clubStatistics[++$i],
                         'minutesPerGoal'    => $clubStatistics[++$i],
@@ -307,7 +332,7 @@ class getPlayer{
                         'goals'             => $nationalStatistics[++$i],
                         'assists'           => $nationalStatistics[++$i],
                         'yellowCards'       => $nationalStatistics[++$i],
-                        'yellow/redCards'   => $nationalStatistics[++$i],
+                        'yellowRedCards'   => $nationalStatistics[++$i],
                         'LeaguredCardse'    => $nationalStatistics[++$i],
                         'concededGoals'     => $nationalStatistics[++$i],
                         'cleanSheet'        => $nationalStatistics[++$i],
@@ -322,7 +347,7 @@ class getPlayer{
                         'goals'             => $nationalStatistics[++$i],
                         'assists'           => $nationalStatistics[++$i],
                         'yellowCards'       => $nationalStatistics[++$i],
-                        'yellow/redCards'   => $nationalStatistics[++$i],
+                        'yellowRedCards'   => $nationalStatistics[++$i],
                         'LeaguredCardse'    => $nationalStatistics[++$i],
                         'minutesPlayed'     => $nationalStatistics[++$i],
                     ];
@@ -418,7 +443,7 @@ class getPlayer{
                     'goals'             => $nationalLeague[++$i],
                     'assists'           => $nationalLeague[++$i],
                     'yellowCards'       => $nationalLeague[++$i],
-                    'yellow/redCards'   => $nationalLeague[++$i],
+                    'yellowRedCards'   => $nationalLeague[++$i],
                     'redCards'          => $nationalLeague[++$i],
                     'minutesPlayed'     => $nationalLeague[++$i],
                 ];
@@ -444,7 +469,7 @@ class getPlayer{
                     'goals'             => $domesticCupData[++$i],
                     'assists'           => $domesticCupData[++$i],
                     'yellowCards'       => $domesticCupData[++$i],
-                    'yellow/redCards'   => $domesticCupData[++$i],
+                    'yellowRedCards'   => $domesticCupData[++$i],
                     'redCards'          => $domesticCupData[++$i],
                     'minutesPlayed'     => $domesticCupData[++$i],
                 ];
@@ -470,7 +495,7 @@ class getPlayer{
                     'goals'             => $internationalCupData[++$i],
                     'assists'           => $internationalCupData[++$i],
                     'yellowCards'       => $internationalCupData[++$i],
-                    'yellow/redCards'   => $internationalCupData[++$i],
+                    'yellowRedCards'   => $internationalCupData[++$i],
                     'redCards'          => $internationalCupData[++$i],
                     'minutesPlayed'     => $internationalCupData[++$i],
                 ];
@@ -490,13 +515,13 @@ class getPlayer{
 
     public function mountData($id){
         $data = [
-            'id'                =>  $id,
-            'playerInfo'        =>  $this->getPlayerData($id),
-            'leagues'           =>  $this->getPlayerStats($id),
-            'national'          =>  $this->getNationalData($id),
-            'club'              =>  $this->getNationalLeague($id),
-            'trophies'          =>  $this->getTrophies($id),
-            'lastScrap'         =>  date("Y-m-d h:i:s")
+        'id'                =>  $id,
+        'playerInfo'        =>  $this->getPlayerData($id),
+        'leaguesPlayed'     =>  $this->getPlayerStats($id),
+        'nationalStats'     =>  $this->getNationalData($id),
+        'clubStats'         =>  $this->getNationalLeague($id),
+        'trophies'          =>  $this->getTrophies($id),
+        'lastScrap'         =>  date("Y-m-d h:i:s")
         ];
 
         return $data;
