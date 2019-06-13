@@ -197,7 +197,6 @@ class getPlayer{
                 ->each(function (Crawler $node) {
                     return $node->text();
                 });
-            // unset($crawler);
 
             $filter = 'div.dataDaten p .dataValue';
 
@@ -311,6 +310,33 @@ class getPlayer{
 
         if(count($checker) < 1){
 
+            $filter = 'div.dataDaten p .dataItem';
+
+            $dataItem = $crawler
+                ->filter($filter)
+                ->each(function (Crawler $node) {
+                    return $node->text();
+                });
+
+            $filter = 'div.dataDaten p .dataValue';
+
+            $dataValue = $crawler
+                ->filter($filter)
+                ->each(function (Crawler $node) {
+                    return $node->text();
+                });
+
+            $playerInfo = [];
+            foreach ($dataValue as $keyValue => $valueValue) {
+                foreach ($dataItem as $keyItem => $valueItem) {
+                    if($keyItem === $keyValue){
+                        $playerInfo[toKey($valueItem)] = [
+                            trim($valueValue)
+                        ];
+                    }
+                }
+            }
+
             $filter = 'table.items tbody tr td';
 
             $nationalStatistics = $crawler
@@ -330,7 +356,6 @@ class getPlayer{
                         'league'            => $nationalStatistics[++$i],
                         'appearances'       => $nationalStatistics[++$i],
                         'goals'             => $nationalStatistics[++$i],
-                        'assists'           => $nationalStatistics[++$i],
                         'yellowCards'       => $nationalStatistics[++$i],
                         'yellowRedCards'   => $nationalStatistics[++$i],
                         'LeaguredCardse'    => $nationalStatistics[++$i],
@@ -419,6 +444,33 @@ class getPlayer{
 
         if(count($checker) < 1){
 
+            $filter = 'div.dataDaten p .dataItem';
+
+            $dataItem = $crawler
+                ->filter($filter)
+                ->each(function (Crawler $node) {
+                    return $node->text();
+                });
+
+            $filter = 'div.dataDaten p .dataValue';
+
+            $dataValue = $crawler
+                ->filter($filter)
+                ->each(function (Crawler $node) {
+                    return $node->text();
+                });
+
+            $playerInfo = [];
+            foreach ($dataValue as $keyValue => $valueValue) {
+                foreach ($dataItem as $keyItem => $valueItem) {
+                    if($keyItem === $keyValue){
+                        $playerInfo[toKey($valueItem)] = [
+                            trim($valueValue)
+                        ];
+                    }
+                }
+            }
+
             $filter = 'div.responsive-table #yw1 table.items  tbody tr td';
 
             $nationalLeague = $crawler
@@ -433,20 +485,36 @@ class getPlayer{
 
 
             $nationalLeagueComp = [];
-            for ($i=0; $i < count($nationalLeague); $i++) {
-                $nationalLeagueComp[] = [
-                    'season'            => $nationalLeague[+$i],
-                    'nulled0'           => urlText($nationalLeague[++$i]),
-                    'competiton'        => urlText($nationalLeague[++$i]),
-                    'club'              => imgSrc($nationalLeague[++$i]),
-                    'appearances'       => urlText($nationalLeague[++$i]),
-                    'goals'             => $nationalLeague[++$i],
-                    'assists'           => $nationalLeague[++$i],
-                    'yellowCards'       => $nationalLeague[++$i],
-                    'yellowRedCards'   => $nationalLeague[++$i],
-                    'redCards'          => $nationalLeague[++$i],
-                    'minutesPlayed'     => $nationalLeague[++$i],
-                ];
+            if(@$playerInfo['position'][0] === 'Goalkeeper'){
+                for ($i=0; $i < count($nationalLeague); $i++) {
+                    $nationalLeagueComp[] = [
+                        'season'            => $nationalLeague[+$i],
+                        'nulled0'           => urlText($nationalLeague[++$i]),
+                        'competiton'        => urlText($nationalLeague[++$i]),
+                        'club'              => imgSrc($nationalLeague[++$i]),
+                        'appearances'       => urlText($nationalLeague[++$i]),
+                        'goals'             => $nationalLeague[++$i],
+                        'concededGoals'     => $nationalLeague[++$i],
+                        'cleanSheets'       => $nationalLeague[++$i],
+                        'minutesPlayed'     => $nationalLeague[++$i],
+                    ];
+                }
+            }else{
+                for ($i=0; $i < count($nationalLeague); $i++) {
+                    $nationalLeagueComp[] = [
+                        'season'            => $nationalLeague[+$i],
+                        'nulled0'           => urlText($nationalLeague[++$i]),
+                        'competiton'        => urlText($nationalLeague[++$i]),
+                        'club'              => imgSrc($nationalLeague[++$i]),
+                        'appearances'       => urlText($nationalLeague[++$i]),
+                        'goals'             => $nationalLeague[++$i],
+                        'assists'           => $nationalLeague[++$i],
+                        'yellowCards'       => $nationalLeague[++$i],
+                        'yellowRedCards'    => $nationalLeague[++$i],
+                        'redCards'          => $nationalLeague[++$i],
+                        'minutesPlayed'     => $nationalLeague[++$i],
+                    ];
+                }
             }
 
             $filter = 'div.responsive-table #yw2 table.items  tbody tr td';
@@ -459,20 +527,39 @@ class getPlayer{
 
 
             $domesticCupDataComp = [];
-            for ($i=0; $i < count($domesticCupData); $i++) {
-                $domesticCupDataComp[] = [
-                    'season'            => $domesticCupData[+$i],
-                    'nulled0'           => urlText($domesticCupData[++$i]),
-                    'competiton'        => urlText($domesticCupData[++$i]),
-                    'club'              => imgSrc($domesticCupData[++$i]),
-                    'appearances'       => urlText($domesticCupData[++$i]),
-                    'goals'             => $domesticCupData[++$i],
-                    'assists'           => $domesticCupData[++$i],
-                    'yellowCards'       => $domesticCupData[++$i],
-                    'yellowRedCards'   => $domesticCupData[++$i],
-                    'redCards'          => $domesticCupData[++$i],
-                    'minutesPlayed'     => $domesticCupData[++$i],
-                ];
+            if(@$playerInfo['position'][0] === 'Goalkeeper'){
+                for ($i=0; $i < count($domesticCupData); $i++) {
+                    $domesticCupDataComp[] = [
+                        'season'            => $domesticCupData[+$i],
+                        'nulled0'           => urlText($domesticCupData[++$i]),
+                        'competiton'        => urlText($domesticCupData[++$i]),
+                        'club'              => imgSrc($domesticCupData[++$i]),
+                        'appearances'       => urlText($domesticCupData[++$i]),
+                        'goals'             => $domesticCupData[++$i],
+                        'yellowCards'       => $domesticCupData[++$i],
+                        'yellowRedCards'    => $domesticCupData[++$i],
+                        'redCards'          => $domesticCupData[++$i],
+                        'concededGoals'     => $domesticCupData[++$i],
+                        'cleanSheets'       => $domesticCupData[++$i],
+                        'minutesPlayed'     => $domesticCupData[++$i],
+                    ];
+                }
+            }else{
+                for ($i=0; $i < count($domesticCupData); $i++) {
+                    $domesticCupDataComp[] = [
+                        'season'            => $domesticCupData[+$i],
+                        'nulled0'           => urlText($domesticCupData[++$i]),
+                        'competiton'        => urlText($domesticCupData[++$i]),
+                        'club'              => imgSrc($domesticCupData[++$i]),
+                        'appearances'       => urlText($domesticCupData[++$i]),
+                        'goals'             => $domesticCupData[++$i],
+                        'assists'           => $domesticCupData[++$i],
+                        'yellowCards'       => $domesticCupData[++$i],
+                        'yellowRedCards'   => $domesticCupData[++$i],
+                        'redCards'          => $domesticCupData[++$i],
+                        'minutesPlayed'     => $domesticCupData[++$i],
+                    ];
+                }
             }
 
             $filter = 'div.responsive-table #yw3 table.items  tbody tr td';
@@ -485,20 +572,39 @@ class getPlayer{
 
 
             $internationalCupDataComp = [];
-            for ($i=0; $i < count($internationalCupData); $i++) {
-                $internationalCupDataComp[] = [
-                    'season'            => $internationalCupData[+$i],
-                    'nulled0'           => urlText($internationalCupData[++$i]),
-                    'competiton'        => urlText($internationalCupData[++$i]),
-                    'club'              => imgSrc($internationalCupData[++$i]),
-                    'appearances'       => urlText($internationalCupData[++$i]),
-                    'goals'             => $internationalCupData[++$i],
-                    'assists'           => $internationalCupData[++$i],
-                    'yellowCards'       => $internationalCupData[++$i],
-                    'yellowRedCards'   => $internationalCupData[++$i],
-                    'redCards'          => $internationalCupData[++$i],
-                    'minutesPlayed'     => $internationalCupData[++$i],
-                ];
+            if(@$playerInfo['position'][0] === 'Goalkeeper'){
+                for ($i=0; $i < count($internationalCupData); $i++) {
+                    $internationalCupDataComp[] = [
+                        'season'            => $internationalCupData[+$i],
+                        'nulled0'           => urlText($internationalCupData[++$i]),
+                        'competiton'        => urlText($internationalCupData[++$i]),
+                        'club'              => imgSrc($internationalCupData[++$i]),
+                        'appearances'       => urlText($internationalCupData[++$i]),
+                        'goals'             => $internationalCupData[++$i],
+                        'yellowCards'       => $internationalCupData[++$i],
+                        'yellowRedCards'    => $internationalCupData[++$i],
+                        'redCards'          => $internationalCupData[++$i],
+                        'concededGoals'     => $internationalCupData[++$i],
+                        'cleanSheets'       => $internationalCupData[++$i],
+                        'minutesPlayed'     => $internationalCupData[++$i],
+                    ];
+                }
+            }else{
+                for ($i=0; $i < count($internationalCupData); $i++) {
+                    $internationalCupDataComp[] = [
+                        'season'            => $internationalCupData[+$i],
+                        'nulled0'           => urlText($internationalCupData[++$i]),
+                        'competiton'        => urlText($internationalCupData[++$i]),
+                        'club'              => imgSrc($internationalCupData[++$i]),
+                        'appearances'       => urlText($internationalCupData[++$i]),
+                        'goals'             => $internationalCupData[++$i],
+                        'assists'           => $internationalCupData[++$i],
+                        'yellowCards'       => $internationalCupData[++$i],
+                        'yellowRedCards'   => $internationalCupData[++$i],
+                        'redCards'          => $internationalCupData[++$i],
+                        'minutesPlayed'     => $internationalCupData[++$i],
+                    ];
+                }
             }
 
             return $getNationalLeague = [
